@@ -12,6 +12,7 @@ import java.rmi.RemoteException;
  * @author Khủng long
  */
 public interface FileServerInterface extends Remote{
+    boolean receive(byte[] data, String checkSum, int id) throws RemoteException;
     void uploadFile(String fileName, byte[] data) throws RemoteException;
     byte[] downloadFile(String fileName) throws RemoteException;
 }

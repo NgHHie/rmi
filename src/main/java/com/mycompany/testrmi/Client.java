@@ -12,7 +12,9 @@ package com.mycompany.testrmi;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
+import testlinhtinh.sosanh2file;
 
 public class Client {
     private FileServerInterface fileServer;
@@ -37,8 +39,8 @@ public class Client {
 //        }
 //    }
 //    
-    public void upload(String localFilePath, String remoteFileName) {
-        int chunkSize = 1024 * 100;
+    public void upload(String localFilePath, String remoteFileName) throws NoSuchAlgorithmException {
+        int chunkSize = 1024 * 1024;
         File file = new File(localFilePath);
         long fileSize = file.length();
         int totalChunks = (int) Math.ceil((double) fileSize / chunkSize);
@@ -59,8 +61,16 @@ public class Client {
                 System.arraycopy(buffer, 0, chunkData, 0, bytesRead);
 
                 // Gửi chunk đến server
-                fileServer.uploadFile(remoteFileName, chunkData);
+//                fileServer.uploadFile(remoteFileName, chunkData);
+                System.out.println(sosanh2file.calculateChunkHash(chunkData));
+                String checkSum = sosanh2file.calculateChunkHash(chunkData);
+                boolean res = fileServer.receive(chunkData, checkSum, 1);
+                while(res == false) {
+                    res = fileServer.receive(chunkData, checkSum, 1);
+                }
+//                fileServer.uploadFile();
                 System.out.println("Uploaded chunk " + (chunkIndex + 1) + " of " + totalChunks);
+                System.out.println("response: " + String.valueOf(res));
             }
         } catch (IOException e) {
             System.err.println("Upload failed: " + e.getMessage());
@@ -92,7 +102,7 @@ public class Client {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
         // Nhập địa chỉ máy chủ từ console
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter server host: ");

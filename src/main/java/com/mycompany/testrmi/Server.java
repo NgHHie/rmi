@@ -15,7 +15,12 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.LDAPCertStoreParameters;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import testlinhtinh.sosanh2file;
 
 /**
  *
@@ -24,7 +29,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Server implements FileServerInterface{
     private final String storageDir = "./filestorage";
     private ConcurrentHashMap<String, byte[]> fileStore;
-    
+    private int clientID = 0;
+    private ConcurrentHashMap<Integer, byte[]> storeData;
+  
     public Server() {
         fileStore = new ConcurrentHashMap<>();
         File dir = new File(storageDir);
@@ -40,6 +47,32 @@ public class Server implements FileServerInterface{
 //                System.err.println("Error loading file: " + file.getName());
 //            }
 //        }
+    }
+    @Override
+    public boolean receive(byte[] chunkData, String checkSum, int id) {
+        System.out.println("cliend id: " + id);
+        String hash = "";
+        try {
+            hash = sosanh2file.calculateChunkHash(chunkData);
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+//        for(int i=0; i< Integer.MAX_VALUE; i++) {
+//            try {
+//                hash = sosanh2file.calculateChunkHash(chunkData);
+//            } catch (IOException ex) {
+//                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+//            } catch (NoSuchAlgorithmException ex) {
+//                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+        boolean res = hash.equals(checkSum);
+        if(res == true) {
+            storeData.put(clientID ++, chunkData);
+        }
+        return res;
     }
     
     @Override
