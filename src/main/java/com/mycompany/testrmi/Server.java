@@ -29,11 +29,12 @@ import testlinhtinh.sosanh2file;
 public class Server implements FileServerInterface{
     private final String storageDir = "./filestorage";
     private ConcurrentHashMap<String, byte[]> fileStore;
-    private int clientID = 0;
+    private int transId;
     private ConcurrentHashMap<Integer, byte[]> storeData;
   
     public Server() {
-        fileStore = new ConcurrentHashMap<>();
+        transId = 0;
+        storeData = new ConcurrentHashMap<>();
         File dir = new File(storageDir);
         if(!dir.exists()) {
             dir.mkdir();
@@ -49,8 +50,7 @@ public class Server implements FileServerInterface{
 //        }
     }
     @Override
-    public boolean receive(byte[] chunkData, String checkSum, int id) {
-        System.out.println("cliend id: " + id);
+    public WriteAck receive(byte[] chunkData, String checkSum) {
         String hash = "";
         try {
             hash = sosanh2file.calculateChunkHash(chunkData);
@@ -69,20 +69,24 @@ public class Server implements FileServerInterface{
 //            }
 //        }
         boolean res = hash.equals(checkSum);
+        int id = setTransId();
         if(res == true) {
-            storeData.put(clientID ++, chunkData);
+            storeData.put(id, chunkData);
         }
-        return res;
+        return new WriteAck(res, res == true ? id : -1);
     }
     
     @Override
-    public synchronized void uploadFile(String fileName, byte[] data) throws RemoteException {
+    public synchronized void uploadFile(String fileName, int id) throws RemoteException {
         File file = new File(storageDir + File.separator + fileName);
 
         try (FileOutputStream fos = new FileOutputStream(file, true)) {
         // Ghi chunk vào tệp (sử dụng 'true' để ghi thêm vào)
-            fos.write(data);
-            System.out.println("Received chunk of size: " + data.length);
+            System.out.println(id);
+            System.out.println(storeData.get(id).length);
+            fos.write(storeData.get(id));
+            System.out.println("Received chunk of size: " + storeData.get(id).length);
+            storeData.remove(id);
         } catch (IOException e) {
             throw new RemoteException("Error uploading file", e);
         }
@@ -96,6 +100,12 @@ public class Server implements FileServerInterface{
         }
         System.out.println("File downloaded: " + fileName);
         return data;
+    }
+    
+    private synchronized int setTransId() {
+        transId ++;
+        int id = transId;
+        return id;
     }
 
     private byte[] readFileToByteArray(File file) throws IOException {

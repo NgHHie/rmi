@@ -64,13 +64,14 @@ public class Client {
 //                fileServer.uploadFile(remoteFileName, chunkData);
                 System.out.println(sosanh2file.calculateChunkHash(chunkData));
                 String checkSum = sosanh2file.calculateChunkHash(chunkData);
-                boolean res = fileServer.receive(chunkData, checkSum, 1);
-                while(res == false) {
-                    res = fileServer.receive(chunkData, checkSum, 1);
+                WriteAck res = fileServer.receive(chunkData, checkSum);
+                while(res.isStatus() == false) {
+                    res = fileServer.receive(chunkData, checkSum);
                 }
-//                fileServer.uploadFile();
+                System.out.println(res);
+                fileServer.uploadFile(remoteFileName, res.getTransId());
                 System.out.println("Uploaded chunk " + (chunkIndex + 1) + " of " + totalChunks);
-                System.out.println("response: " + String.valueOf(res));
+                
             }
         } catch (IOException e) {
             System.err.println("Upload failed: " + e.getMessage());

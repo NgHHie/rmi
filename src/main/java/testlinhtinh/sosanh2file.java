@@ -51,8 +51,8 @@ public class sosanh2file {
     }
 
     public static void main(String[] args) {
-        String filePath1 = "D:/Downloads/ubuntu-24.04.1-desktop-amd64.iso";
-        String filePath2 = "D:/Documents/NetBeansProjects/testRMI/filestorage/testchunk2.iso";
+        String filePath1 = "D:/Downloads/ubuntu24.04.iso";
+        String filePath2 = "D:/Documents/NetBeansProjects/testRMI/filestorage/hiep1.iso";
 
         if (areFilesEqual(filePath1, filePath2)) {
             System.out.println("Files are equal.");
