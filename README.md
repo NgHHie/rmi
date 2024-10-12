@@ -1,13 +1,20 @@
-Thành viên: 
-1. Trịnh Vinh Tuấn Đạt - B21DCCN031
-2. Nguyễn Hoàng Hiệp - B21DCCN343
-3. Hoàng Anh Vũ - B21DCCN795
+# Hệ Thống File Phân Tán Sử Dụng Giao Thức RMI
 
-Đề tài: Hệ thống file phân tán sử dụng giao thức RMI.
-Tuần 1: 
-- Demo upload file đơn giản với kiến trúc Server-Client, RMI Java.
-- Với mỗi file, chia thành các chunk data gửi đi lần lượt, kích thước chunk cố định 1MB/1chunk.
-- Kiểm tra tính toàn vẹn dữ liệu trước khi ghi.
-- Nếu dữ liệu toàn vẹn, ghi vào file; nếu không, thực hiện gửi lại.
-![image](https://github.com/user-attachments/assets/b0fec398-9cc8-4f84-ae32-447f7d6e7a7a)
- 
+## Thành Viên
+1. **Trịnh Vinh Tuấn Đạt** - B21DCCN031
+2. **Nguyễn Hoàng Hiệp** - B21DCCN343
+3. **Hoàng Anh Vũ** - B21DCCN795
+
+## Mô Tả Đề Tài
+Hệ thống cho phép phân tán và quản lý file hiệu quả thông qua giao thức RMI (Remote Method Invocation).
+
+## Tiến Độ Công Việc
+
+### Tuần 1
+- **Chức năng:** Demo upload file đơn giản với kiến trúc Server-Client sử dụng RMI trong Java.
+- **Quy trình:**
+  - Mỗi file được chia thành các chunk dữ liệu và gửi đi lần lượt, với kích thước chunk cố định là **1MB/1 chunk**.
+  - Kiểm tra tính toàn vẹn dữ liệu trước khi ghi.
+  - Nếu dữ liệu toàn vẹn, sẽ ghi vào file; nếu không, thực hiện gửi lại.
+
+![Demo Upload File](https://github.com/user-attachments/assets/b0fec398-9cc8-4f84-ae32-447f7d6e7a7a)
