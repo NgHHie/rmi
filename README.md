@@ -15,6 +15,7 @@ Hệ thống cho phép phân tán và quản lý file hiệu quả thông qua gi
 - **Quy trình:**
   - Mỗi file được chia thành các chunk dữ liệu và gửi đi lần lượt, với kích thước chunk cố định là **1MB/1 chunk**.
   - Kiểm tra tính toàn vẹn dữ liệu trước khi ghi.
-  - Nếu dữ liệu toàn vẹn, sẽ ghi vào file; nếu không, thực hiện gửi lại.
+  - Nếu dữ liệu toàn vẹn, cấp phát id cho client.
+  - Client gửi yêu cầu ghi cùng id cho server, server thực hiện ghi file.
 
 ![Demo Upload File](https://github.com/user-attachments/assets/b0fec398-9cc8-4f84-ae32-447f7d6e7a7a)
