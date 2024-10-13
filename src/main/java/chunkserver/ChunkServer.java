@@ -2,37 +2,37 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.testrmi;
+package chunkserver;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.rmi.Naming;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.LDAPCertStoreParameters;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import model.WriteAck;
 import testlinhtinh.sosanh2file;
 
 /**
  *
  * @author Khủng long
  */
-public class Server implements FileServerInterface{
+public class ChunkServer implements ChunkServerInterface {
     private final String storageDir = "./filestorage";
     private ConcurrentHashMap<String, byte[]> fileStore;
     private int transId;
     private ConcurrentHashMap<Integer, byte[]> storeData;
   
-    public Server() {
+    public ChunkServer() {
         transId = 0;
         storeData = new ConcurrentHashMap<>();
         File dir = new File(storageDir);
@@ -55,9 +55,9 @@ public class Server implements FileServerInterface{
         try {
             hash = sosanh2file.calculateChunkHash(chunkData);
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ChunkServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ChunkServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 //        for(int i=0; i< Integer.MAX_VALUE; i++) {
 //            try {
@@ -124,9 +124,9 @@ public class Server implements FileServerInterface{
     public static void main(String[] args) {
         try {
             // Tạo đối tượng máy chủ
-            Server server = new Server();
+            ChunkServer chunkServer = new ChunkServer();
             // Xuất bản đối tượng máy chủ
-            FileServerInterface stub = (FileServerInterface) UnicastRemoteObject.exportObject((Remote) server, 0);
+            ChunkServerInterface stub = (ChunkServerInterface) UnicastRemoteObject.exportObject((Remote) chunkServer, 0);
             // Tạo hoặc lấy Registry trên cổng 1099
             Registry registry = LocateRegistry.createRegistry(1099);
             // Đăng ký đối tượng máy chủ với tên "FileServer"

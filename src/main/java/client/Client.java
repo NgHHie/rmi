@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.testrmi;
+package client;
 
 /**
  *
@@ -14,15 +14,18 @@ import java.rmi.registry.Registry;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
+
+import chunkserver.ChunkServerInterface;
+import model.WriteAck;
 import testlinhtinh.sosanh2file;
 
 public class Client {
-    private FileServerInterface fileServer;
+    private ChunkServerInterface fileServer;
 
     public Client(String host) {
         try {
             Registry registry = LocateRegistry.getRegistry(host);
-            fileServer = (FileServerInterface) registry.lookup("FileServer");
+            fileServer = (ChunkServerInterface) registry.lookup("FileServer");
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();
