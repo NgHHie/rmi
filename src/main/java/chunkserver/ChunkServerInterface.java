@@ -8,13 +8,16 @@ import model.WriteAck;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import model.Request;
+import model.Response;
 
 /**
  *
  * @author Khủng long
  */
 public interface ChunkServerInterface extends Remote{
-    WriteAck receive(byte[] data, String checkSum) throws RemoteException;
+    Response requestReceive(Request req) throws RemoteException; 
+    WriteAck receiveChunk(byte[] data, int idOfTransaction) throws RemoteException;
     void uploadFile(String fileName, int transId) throws RemoteException;
     byte[] downloadFile(String fileName) throws RemoteException;
 }

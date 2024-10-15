@@ -15,9 +15,15 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Request;
+import model.Response;
 
 import model.WriteAck;
 import testlinhtinh.sosanh2file;
@@ -30,10 +36,12 @@ public class ChunkServer implements ChunkServerInterface {
     private final String storageDir = "./filestorage";
     private ConcurrentHashMap<String, byte[]> fileStore;
     private int transId;
+    private Map<Integer, List<Integer>> chunkId;
     private ConcurrentHashMap<Integer, byte[]> storeData;
   
     public ChunkServer() {
         transId = 0;
+        chunkId = new HashMap<>();
         storeData = new ConcurrentHashMap<>();
         File dir = new File(storageDir);
         if(!dir.exists()) {
@@ -49,31 +57,33 @@ public class ChunkServer implements ChunkServerInterface {
 //            }
 //        }
     }
+    
     @Override
-    public WriteAck receive(byte[] chunkData, String checkSum) {
-        String hash = "";
-        try {
-            hash = sosanh2file.calculateChunkHash(chunkData);
-        } catch (IOException ex) {
-            Logger.getLogger(ChunkServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(ChunkServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-//        for(int i=0; i< Integer.MAX_VALUE; i++) {
-//            try {
-//                hash = sosanh2file.calculateChunkHash(chunkData);
-//            } catch (IOException ex) {
-//                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-//            } catch (NoSuchAlgorithmException ex) {
-//                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-        boolean res = hash.equals(checkSum);
+    public Response requestReceive(Request req) throws RemoteException{
+        String typeOfRequest = req.getTypeOfRequest();
+        long sizeOfFile = req.getSizeOfFile();
+        String typeOfFile = req.getTypeOfFile();
         int id = setTransId();
-        if(res == true) {
-            storeData.put(id, chunkData);
+        String idOfTransaction = String.valueOf(id);
+        chunkId.put(id, new ArrayList<>());
+        return new Response(typeOfRequest, idOfTransaction);
+    }
+    @Override
+    public WriteAck receiveChunk(byte[] chunkData, int idOfTransaction) throws RemoteException {
+        int idOfChunk = chunkId.get(idOfTransaction).size();
+        chunkId.get(idOfTransaction).add(idOfChunk);
+        boolean res = false;
+        String fileName = String.valueOf(idOfTransaction) + "-" + String.valueOf(idOfChunk);
+        File file = new File(storageDir + File.separator + fileName);
+        try (FileOutputStream fos = new FileOutputStream(file, true)) {
+            fos.write(chunkData);
+            System.out.println("Received chunk of size: " + chunkData.length);
+            res = true;
+        } catch (IOException e) {
+            res = false;
+            throw new RemoteException("Error uploading file", e);
         }
-        return new WriteAck(res, res == true ? id : -1);
+        return new WriteAck(res, idOfTransaction, res == true ? idOfChunk : -1);
     }
     
     @Override
@@ -101,7 +111,7 @@ public class ChunkServer implements ChunkServerInterface {
         System.out.println("File downloaded: " + fileName);
         return data;
     }
-    
+
     private synchronized int setTransId() {
         transId ++;
         int id = transId;

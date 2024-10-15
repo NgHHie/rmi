@@ -16,6 +16,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
 import chunkserver.ChunkServerInterface;
+import java.rmi.RemoteException;
+import model.Request;
+import model.Response;
 import model.WriteAck;
 import testlinhtinh.sosanh2file;
 
@@ -31,23 +34,16 @@ public class Client {
             e.printStackTrace();
         }
     }
-
-//    public void upload(String localFilePath, String remoteFileName) {
-//        try {
-//            byte[] data = readFileToByteArray(new File(localFilePath));
-//            fileServer.uploadFile(remoteFileName, data);
-//            System.out.println("Uploaded file: " + remoteFileName);
-//        } catch (Exception e) {
-//            System.err.println("Upload failed: " + e.getMessage());
-//        }
-//    }
-//    
-    public void upload(String localFilePath, String remoteFileName) throws NoSuchAlgorithmException {
+ 
+    public void upload(String localFilePath, String remoteFileName) throws NoSuchAlgorithmException, RemoteException {
         int chunkSize = 1024 * 1024;
         File file = new File(localFilePath);
         long fileSize = file.length();
         int totalChunks = (int) Math.ceil((double) fileSize / chunkSize);
-        
+        String typeOfFile = localFilePath.substring(localFilePath.lastIndexOf(".") + 1);
+        Request req = new Request("write", fileSize, typeOfFile);
+        Response res = fileServer.requestReceive(req);
+        System.out.println(res);
         try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
             byte[] buffer = new byte[chunkSize];
             int bytesRead;
@@ -55,25 +51,18 @@ public class Client {
             for (int chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
                 // Đọc một chunk từ tệp
                 bytesRead = bis.read(buffer);
-                
-                // Nếu chưa đọc đủ bytes, chỉ gửi bytes đã đọc
                 if (bytesRead == -1) break; // Kiểm tra xem đã đến cuối tệp chưa
                 
-                // Tạo một mảng chứa dữ liệu chunk với kích thước thực tế
                 byte[] chunkData = new byte[bytesRead];
                 System.arraycopy(buffer, 0, chunkData, 0, bytesRead);
 
-                // Gửi chunk đến server
-//                fileServer.uploadFile(remoteFileName, chunkData);
-                System.out.println(sosanh2file.calculateChunkHash(chunkData));
-                String checkSum = sosanh2file.calculateChunkHash(chunkData);
-                WriteAck res = fileServer.receive(chunkData, checkSum);
-                while(res.isStatus() == false) {
-                    res = fileServer.receive(chunkData, checkSum);
+                int idOfTransaction = Integer.parseInt(res.getIdOfTransaction());
+                WriteAck w_ack = fileServer.receiveChunk(chunkData, idOfTransaction);
+                while(w_ack.isStatus() == false) {
+                    w_ack = fileServer.receiveChunk(chunkData, idOfTransaction);
                 }
-                System.out.println(res);
-                fileServer.uploadFile(remoteFileName, res.getTransId());
-                System.out.println("Uploaded chunk " + (chunkIndex + 1) + " of " + totalChunks);
+                System.out.println(w_ack);
+                System.out.println("Uploaded chunk " + (chunkIndex) + " of " + totalChunks + "(" + chunkData.length + " bytes)");
                 
             }
         } catch (IOException e) {
@@ -106,7 +95,7 @@ public class Client {
         }
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, RemoteException {
         // Nhập địa chỉ máy chủ từ console
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter server host: ");

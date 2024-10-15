@@ -15,10 +15,20 @@ public class WriteAck implements Serializable{
     
     private boolean status;
     private int transId;
-
-    public WriteAck(boolean status, int transId) {
+    private int chunkId;
+    
+    public WriteAck(boolean status, int transId, int chunkId) {
         this.status = status;
         this.transId = transId;
+        this.chunkId = chunkId;
+    }
+
+    public void setChunkId(int chunkId) {
+        this.chunkId = chunkId;
+    }
+
+    public int getChunkId() {
+        return chunkId;
     }
 
     public boolean isStatus() {
@@ -39,9 +49,6 @@ public class WriteAck implements Serializable{
 
     @Override
     public String toString() {
-        return "WriteAck{" + "status=" + status + ", transId=" + transId + '}';
-    }
-    
-    
-    
+        return "WriteAck{" + "status=" + status + ", transId=" + transId + ", chunkId=" + chunkId + '}';
+    } 
 }

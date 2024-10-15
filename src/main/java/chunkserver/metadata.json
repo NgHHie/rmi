@@ -1,0 +1,17 @@
+{
+    "name": "Khủng long",
+    "transaction": [
+        {
+        "id_trans": "0",
+        "size": 1024,
+        "type": ".iso",
+        "num_of_chunk": 1,
+        "list_chunks": [
+            {
+            "id_chunk": "0-1",
+            "size_of_chunk": 1024
+            }
+        ]
+        }
+    ]
+}
